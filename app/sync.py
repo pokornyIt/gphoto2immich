@@ -35,12 +35,16 @@ class SyncService:
 
             asset_id: str | None = self.immich.find_asset_by_filename(filename)
             if asset_id:
-                success: bool = self.immich.update_asset_description(asset_id, description)
-                if success:
-                    print(f"[SYNC] Updated: {filename}")
+                if self.config.dry_run:
+                    print(f'[DRY-RUN] Would update: {filename} → "{description}"')
                     updated += 1
                 else:
-                    print(f"[SYNC] Failed to update: {filename}")
+                    success: bool = self.immich.update_asset_description(asset_id, description)
+                    if success:
+                        print(f"[SYNC] Updated: {filename}")
+                        updated += 1
+                    else:
+                        print(f"[SYNC] Failed to update: {filename}")
             else:
                 print(f"[SYNC] Not found in Immich: {filename}")
 

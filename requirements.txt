@@ -1,18 +1,19 @@
-python-dotenv
-google-api-python-client
-google-auth
-google-auth-oauthlib
+python-dotenv >= 1.0.0, < 2.0.0
+google-api-python-client >= 2.160.0, < 3.0.0
+google-auth >= 2.39.0, < 3.0.0
+google-auth-oauthlib >= 1.2.0, < 2.0.0
+requests >= 2.30.0, < 3.0.0
 
 # testing
-pytest
-pytest-cov
-pytest-mock
-requests-mock
+pytest >% 8.3.0, < 8.5.0
+pytest-cov >= 6.1.0, < 6.5.0
+pytest-mock >= 3.14.0, < 3.20.0
+requests-mock >= 1.12.0, < 1.20.0
 
 # quality
-mypy
-ruff
+mypy >= 1.15.0
+ruff >= 0.11.0
 pre-commit
 
 # mypy types
-types-requests
+types-requests >= 2.32.0

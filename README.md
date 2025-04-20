@@ -52,8 +52,31 @@ This will launch the app, authorize access to your Google Photos account, and be
 | `IMMICH_BASE_URL`     | Base URL of your Immich instance (e.g., `http://host/api`)   |
 | `IMMICH_API_KEY`      | API key for your Immich user (generated in web UI)           |
 | `DAYS_BACK`           | Number of days to look back for changed photos (default: 15) |
+| `DRY_RUN`              | Set to `true` to simulate syncing without modifying anything in Immich   |
 
-For a detailed guide on obtaining these values, see the [MVP document](./gphoto2immich-mvp,md).
+For a detailed guide on obtaining these values, see the [MVP document](./gphoto2immich-mvp.md).
+
+## 🧪 Dry-Run Mode
+
+You can test the entire sync process safely by enabling dry-run mode.  
+It will:
+
+- Connect to Google Photos
+- Fetch and analyze media
+- Match photos with Immich
+- **Skip all write operations**
+
+To enable dry-run mode, add this to your `.env` file:
+
+```bash
+DRY_RUN=true
+```
+
+In output, you'll see lines like:
+
+```log
+[DRY-RUN] Would update: myphoto.jpg → "A trip to the mountains"
+```
 
 ---
 

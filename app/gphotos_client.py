@@ -1,14 +1,17 @@
 """Google Photos API client for fetching media items and their metadata."""
 
 import datetime
-from typing import Any, Dict, List, Optional
+import json
+from typing import Any, Optional
 
+import requests
 from google.auth.external_account_authorized_user import Credentials as auth_user_credentials
 from google.oauth2.credentials import Credentials as oauth2_credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
-from googleapiclient.discovery import build
+from googleapiclient.discovery import build_from_document
 
-SCOPES: List[str] = ["https://www.googleapis.com/auth/photoslibrary.readonly"]
+SCOPES: list[str] = ["https://www.googleapis.com/auth/photoslibrary.readonly"]
+DISCOVERY_URL: str = "https://photoslibrary.googleapis.com/$discovery/rest?version=v1"
 
 
 class GooglePhotosClient:
@@ -31,9 +34,11 @@ class GooglePhotosClient:
         """
         flow: InstalledAppFlow = InstalledAppFlow.from_client_secrets_file(credentials_path, SCOPES)
         user_credentials: auth_user_credentials | oauth2_credentials = flow.run_local_server(port=0)
-        return build("photoslibrary", "v1", credentials=user_credentials)
 
-    def fetch_media_items(self, days_back: int) -> List[Dict]:
+        discovery_doc: str = requests.get(DISCOVERY_URL).text
+        return build_from_document(json.loads(discovery_doc), credentials=user_credentials)
+
+    def fetch_media_items(self, days_back: int) -> list[dict]:
         start_date: str = (datetime.datetime.utcnow() - datetime.timedelta(days=days_back)).isoformat("T") + "Z"
         media_items: list[Any] = []
 
@@ -50,7 +55,7 @@ class GooglePhotosClient:
 
         return media_items
 
-    def extract_metadata(self, media_item: Dict) -> Dict[str, Optional[str]]:
+    def extract_metadata(self, media_item: dict) -> dict[str, Optional[str]]:
         """Extract metadata from a media item.
 
         :param media_item: A media item dictionary from Google Photos API.
