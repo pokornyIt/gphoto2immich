@@ -1,0 +1,14 @@
+__pycache__/
+*.pyc
+.env
+.vscode/
+.idea/
+tests/
+.gitignore
+Dockerfile
+compose.yaml
+docker-compose.yaml
+.env.example
+token.json
+*.log
+credentials.json
