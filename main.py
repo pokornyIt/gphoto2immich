@@ -11,7 +11,6 @@ def main() -> None:
     print(f"- Google credentials: {config.google_credentials_path}")
     print(f"- Immich URL: {config.immich_base_url}")
     print(f"- Days back: {config.days_back}")
-    config = Config.load()
     sync = SyncService(config)
     sync.run()
 

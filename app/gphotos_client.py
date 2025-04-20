@@ -58,12 +58,7 @@ class GooglePhotosClient:
             for item in response.get("mediaItems", []):
                 metadata = item.get("mediaMetadata", {})
                 creation_time = metadata.get("creationTime")
-                photo_name = item.get("filename")
                 if creation_time and creation_time >= start_date:
-                    # media_items.append(item)
-                    pass
-                if photo_name == "PXL_20250317_131553577.jpg":
-                    print(f"[DEBUG] Found item: {photo_name} with creation time: {creation_time}")
                     media_items.append(item)
 
             request = self.service.mediaItems().list_next(request, response)
