@@ -1,0 +1,9 @@
+services:
+  gphoto2immich:
+    build: .
+    container_name: gphoto2immich
+    env_file:
+      - .env
+    volumes:
+      - ./credentials.json:/app/credentials.json:ro
+    restart: "no"

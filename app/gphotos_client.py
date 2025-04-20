@@ -1,0 +1,64 @@
+"""Google Photos API client for fetching media items and their metadata."""
+
+import datetime
+from typing import Any, Dict, List, Optional
+
+from google.auth.external_account_authorized_user import Credentials as auth_user_credentials
+from google.oauth2.credentials import Credentials as oauth2_credentials
+from google_auth_oauthlib.flow import InstalledAppFlow
+from googleapiclient.discovery import build
+
+SCOPES: List[str] = ["https://www.googleapis.com/auth/photoslibrary.readonly"]
+
+
+class GooglePhotosClient:
+    """Client for interacting with Google Photos API."""
+
+    service: Any
+
+    def __init__(self, credentials_path: str) -> None:
+        """Initialize the Google Photos client.
+
+        :param credentials_path: Path to the Google API credentials JSON file.
+        """
+        self.service = self._authenticate(credentials_path)
+
+    def _authenticate(self, credentials_path: str) -> Any:
+        """Authenticate and create a service object for Google Photos API.
+
+        :param credentials_path: Path to the Google API credentials JSON file.
+        :return: Authenticated service object for Google Photos API.
+        """
+        flow: InstalledAppFlow = InstalledAppFlow.from_client_secrets_file(credentials_path, SCOPES)
+        user_credentials: auth_user_credentials | oauth2_credentials = flow.run_local_server(port=0)
+        return build("photoslibrary", "v1", credentials=user_credentials)
+
+    def fetch_media_items(self, days_back: int) -> List[Dict]:
+        start_date: str = (datetime.datetime.utcnow() - datetime.timedelta(days=days_back)).isoformat("T") + "Z"
+        media_items: list[Any] = []
+
+        request = self.service.mediaItems().list(pageSize=100)
+        while request is not None:
+            response = request.execute()
+            for item in response.get("mediaItems", []):
+                metadata = item.get("mediaMetadata", {})
+                creation_time = metadata.get("creationTime")
+                if creation_time and creation_time >= start_date:
+                    media_items.append(item)
+
+            request = self.service.mediaItems().list_next(request, response)
+
+        return media_items
+
+    def extract_metadata(self, media_item: Dict) -> Dict[str, Optional[str]]:
+        """Extract metadata from a media item.
+
+        :param media_item: A media item dictionary from Google Photos API.
+        :return: A dictionary containing the extracted metadata.
+        """
+        return {
+            "id": media_item.get("id"),
+            "filename": media_item.get("filename"),
+            "description": media_item.get("description"),
+            "creationTime": media_item.get("mediaMetadata", {}).get("creationTime"),
+        }
