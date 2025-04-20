@@ -1,6 +1,6 @@
 """Immich Client for Python"""
 
-from typing import Any, Optional
+from typing import Any
 
 import requests
 
@@ -20,22 +20,23 @@ class ImmichClient:
         self.base_url = base_url.rstrip("/")
         self.headers = {"x-api-key": api_key, "Content-Type": "application/json"}
 
-    def find_asset_by_filename(self, filename: str) -> Optional[str]:
+    def find_asset_by_filename(self, filename: str) -> str | None:
         """Find an asset by its filename.
 
         :param filename: The filename of the asset to search for.
         :return: The asset ID if found, otherwise None.
         """
+        url: str = f"{self.base_url}/search/metadata"
+        payload: dict[str, str] = {"originalFileName": filename}
 
-        # This depends on how the Immich API supports querying – for now we fake it
-        response: requests.Response = requests.get(f"{self.base_url}/assets", headers=self.headers)
+        response: requests.Response = requests.post(url, headers=self.headers, json=payload)
         response.raise_for_status()
-        assets: Any = response.json()
 
-        for asset in assets:
-            if asset.get("originalFileName") == filename:
-                return str(asset["id"])
-
+        data: Any = response.json()
+        assets: Any = data.get("assets", {}).get("items", [])
+        if assets:
+            print(f"[IMMICH] Found asset ID: {assets[0]['id']} for filename: {filename}")
+            return str(assets[0]["id"])
         return None
 
     def update_asset_description(self, asset_id: str, description: str) -> bool:

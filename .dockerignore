@@ -8,3 +8,7 @@ tests/
 Dockerfile
 compose.yaml
 docker-compose.yaml
+.env.example
+token.json
+*.log
+credentials.json
