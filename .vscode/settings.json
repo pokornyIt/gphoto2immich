@@ -62,7 +62,10 @@
         "capsys",
         "addopts",
         "testpaths",
-        "mypy"
+        "mypy",
+        "caplog",
+        "levelname",
+        "exif"
     ],
     "cSpell.ignorePaths": [
         "package-lock.json",
@@ -76,4 +79,6 @@
     "python.testing.pytestArgs": [
         "tests"
     ],
+    "git-graph.dialog.fetchRemote.prune": true,
+    "git-graph.dialog.fetchRemote.pruneTags": true,
 }

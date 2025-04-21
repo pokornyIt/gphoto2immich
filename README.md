@@ -1,109 +1,97 @@
 # gphoto2immich
 
-A Python-based Docker tool for syncing metadata (e.g. descriptions, titles, albums) from **Google Photos** into your **Immich** instance.
+Synchronize photo descriptions from Google Photos to [Immich](https://github.com/immich-app/immich).
 
----
+## 🔧 Features
 
-## ✨ Features
+- Pull metadata (filename, description, creation time) from Google Photos API
+- Find matching assets in Immich by filename
+- Update asset descriptions in Immich if found
+- Dry-run mode for safe testing
+- Docker + Compose setup
+- Pre-commit checks (mypy, ruff, pytest)
+- Logging with level control (DEBUG, INFO, WARNING, ERROR)
+- Synchronization strategy control (overwrite / skip_if_present)
 
-- Connects to Google Photos using OAuth 2.0
-- Looks back (default 15 days) to fetch newly uploaded or updated media
-- Finds matching files in Immich by filename
-- Updates metadata (e.g. descriptions) in Immich via its API
-- Easily configurable via `.env`
-- Fully testable with `pytest`
-
----
-
-## 🚀 Getting Started
-
-### 1. Clone the Repository
+## 📦 Installation
 
 ```bash
-git clone https://github.com/yourname/gphoto2immich.git
+git clone https://github.com/pokornyIt/gphoto2immich.git
 cd gphoto2immich
-```
-
-### 2. Setup `.env` file
-
-Create your own `.env` file based on the example:
-
-```bash
 cp .env.example .env
+# Fill in .env with your Google credentials and Immich info
 ```
 
-Then edit the values to match your environment. See [below](#configuration-values) for how to obtain them.
-
-### 3. Build & Run via Docker Compose
+Or use Docker:
 
 ```bash
-docker compose up --build
+docker compose run --rm sync
 ```
 
-This will launch the app, authorize access to your Google Photos account, and begin syncing.
+## 🔑 How to obtain Google API credentials
 
----
+1. Go to [Google Cloud Console](https://console.cloud.google.com/)
+2. Create a new project (or reuse existing)
+3. Enable the **Google Photos Library API**
+4. Go to "APIs & Services > Credentials"
+5. Click **Create Credentials > OAuth client ID**
+6. Choose **Desktop app** as application type
+7. Download the resulting `client_secret_XXXX.json`
+8. Save it as `google-credentials.json` (or update path in `.env`)
 
-## ⚙️ Configuration Values
+> On first run, a browser window will open to authenticate your Google account and generate a `token.json` file.
 
-| Variable              | Description                                                  |
-|-----------------------|--------------------------------------------------------------|
-| `GOOGLE_CREDENTIALS_PATH` | Path to your OAuth2 `credentials.json` downloaded from Google Cloud |
-| `IMMICH_BASE_URL`     | Base URL of your Immich instance (e.g., `http://host/api`)   |
-| `IMMICH_API_KEY`      | API key for your Immich user (generated in web UI)           |
-| `DAYS_BACK`           | Number of days to look back for changed photos (default: 15) |
-| `DRY_RUN`              | Set to `true` to simulate syncing without modifying anything in Immich   |
+## 🛠️ Configuration
 
-For a detailed guide on obtaining these values, see the [MVP document](./gphoto2immich-mvp.md).
+Edit `.env` file:
 
-## 🧪 Dry-Run Mode
-
-You can test the entire sync process safely by enabling dry-run mode.  
-It will:
-
-- Connect to Google Photos
-- Fetch and analyze media
-- Match photos with Immich
-- **Skip all write operations**
-
-To enable dry-run mode, add this to your `.env` file:
-
-```bash
+```dotenv
+GOOGLE_CREDENTIALS_PATH=./google-credentials.json
+IMMICH_BASE_URL=https://immich.example.com/api
+IMMICH_API_KEY=your_api_key
+DAYS_BACK=14
 DRY_RUN=true
+LOG_LEVEL=INFO
+SYNC_STRATEGY=overwrite  # or skip_if_present
 ```
 
-In output, you'll see lines like:
+## ▶️ Running manually
 
-```log
-[DRY-RUN] Would update: myphoto.jpg → "A trip to the mountains"
+```bash
+python main.py
 ```
 
----
-
-## 🧪 Running Tests
-
-You can run the test suite locally:
+## 🧪 Testing
 
 ```bash
 pytest
 ```
 
+## 🔄 Synchronization strategies
+
+Use `SYNC_STRATEGY` to control how the tool behaves when Immich already has a description:
+
+- `overwrite` – always overwrite existing Immich descriptions
+- `skip_if_present` – skip updating if Immich already has a description
+
+## 🧯 Dry-run mode
+
+When `DRY_RUN=true`, updates to Immich are skipped but logged, so you can verify the behavior safely.
+
+## 📃 Logging
+
+Set `LOG_LEVEL=DEBUG` (or INFO/WARNING/ERROR) to control verbosity. Each module uses structured logging.
+
+## 🧭 Roadmap
+
+- Export summary of changes
+- Asynchronous sync engine
+- Album sync support
+- CLI interface
+- Docker image publishing
+
+See `issues.md` for detailed ideas.
+
 ---
 
-## 📦 Project Structure
-
-```
-app/
-  config.py           # Loads .env config
-  gphotos_client.py   # Google Photos API
-  immich_client.py    # Immich API wrapper
-  sync.py             # Core logic
-tests/
-  test_*.py           # Unit tests
-```
-
----
-
-## 📋 License
-
-MIT License
+Project licensed under MIT.

@@ -15,6 +15,7 @@ class Config:
     immich_api_key: str
     days_back: int = 15
     dry_run: bool = False
+    sync_strategy: str = "overwrite"
 
     @staticmethod
     def load() -> "Config":
@@ -24,4 +25,5 @@ class Config:
             immich_api_key=os.getenv("IMMICH_API_KEY") or "",
             days_back=int(os.getenv("DAYS_BACK", "15")),
             dry_run=os.getenv("DRY_RUN", "false").lower() in ("1", "true", "yes"),
+            sync_strategy=os.getenv("SYNC_STRATEGY", "overwrite"),
         )

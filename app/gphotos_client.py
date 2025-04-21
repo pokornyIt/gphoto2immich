@@ -3,13 +3,17 @@
 import datetime
 import json
 import os
+from logging import Logger
 from typing import Any, Optional
 
 import requests
 from google.auth.external_account_authorized_user import Credentials as auth_user_credentials
+from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials as oauth2_credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build_from_document
+
+from app.log import get_logger
 
 SCOPES: list[str] = ["https://www.googleapis.com/auth/photoslibrary.readonly"]
 DISCOVERY_URL: str = "https://photoslibrary.googleapis.com/$discovery/rest?version=v1"
@@ -20,12 +24,14 @@ class GooglePhotosClient:
     """Client for interacting with Google Photos API."""
 
     service: Any
+    logger: Logger
 
     def __init__(self, credentials_path: str) -> None:
         """Initialize the Google Photos client.
 
         :param credentials_path: Path to the Google API credentials JSON file.
         """
+        self.logger = get_logger(self.__class__.__name__)
         self.service = self._authenticate(credentials_path)
 
     def _authenticate(self, credentials_path: str) -> Any:
@@ -37,18 +43,30 @@ class GooglePhotosClient:
         user_credentials: auth_user_credentials | oauth2_credentials
 
         if os.path.exists(TOKEN_PATH):
+            self.logger.debug("Loading existing token from %s", TOKEN_PATH)
             user_credentials = oauth2_credentials.from_authorized_user_file(TOKEN_PATH, SCOPES)
 
-        else:
-            flow: InstalledAppFlow = InstalledAppFlow.from_client_secrets_file(credentials_path, SCOPES)
-            user_credentials = flow.run_local_server(port=0)
-        with open(TOKEN_PATH, "w") as token_file:
-            token_file.write(user_credentials.to_json())
+        if not user_credentials or not user_credentials.valid:
+            if user_credentials and user_credentials.expired and user_credentials.refresh_token:
+                self.logger.info("Refreshing expired token...")
+                user_credentials.refresh(Request())
+            else:
+                self.logger.info("No valid token found, starting OAuth flow...")
+                flow: InstalledAppFlow = InstalledAppFlow.from_client_secrets_file(credentials_path, SCOPES)
+                user_credentials = flow.run_local_server(port=0)
+            with open(TOKEN_PATH, "w") as token_file:
+                token_file.write(user_credentials.to_json())
+                self.logger.info("Saved new token to %s", TOKEN_PATH)
 
         discovery_doc: str = requests.get(DISCOVERY_URL).text
         return build_from_document(json.loads(discovery_doc), credentials=user_credentials)
 
     def fetch_media_items_all(self, days_back: int) -> list[dict]:
+        """Fetch all media items from Google Photos API.
+
+        :param days_back: Number of days back to fetch media items.
+        :return: List of media items from Google Photos API.
+        """
         start_date: str = (datetime.datetime.utcnow() - datetime.timedelta(days=days_back)).isoformat("T") + "Z"
         media_items: list[Any] = []
 
@@ -85,12 +103,17 @@ class GooglePhotosClient:
             },
         }
 
+        self.logger.debug("Requesting media items from %s to %s", start.date(), end.date())
+
         request = self.service.mediaItems().search(body=request_body)
         while request is not None:
             response = request.execute()
-            media_items.extend(response.get("mediaItems", []))
+            collect_items = response.get("mediaItems", [])
+            self.logger.debug("Fetched %d items in this page", len(collect_items))
+            media_items.extend(collect_items)
             request = self.service.mediaItems().search_next(request, response)
 
+        self.logger.info("Total media items fetched: %d", len(media_items))
         return media_items
 
     def extract_metadata(self, media_item: dict) -> dict[str, Optional[str]]:
@@ -99,9 +122,11 @@ class GooglePhotosClient:
         :param media_item: A media item dictionary from Google Photos API.
         :return: A dictionary containing the extracted metadata.
         """
-        return {
+        metadata: dict[str, Any] = {
             "id": media_item.get("id"),
             "filename": media_item.get("filename"),
             "description": media_item.get("description"),
             "creationTime": media_item.get("mediaMetadata", {}).get("creationTime"),
         }
+        self.logger.debug("Extracted metadata: %s", metadata)
+        return metadata
