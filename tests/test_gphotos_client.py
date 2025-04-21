@@ -3,6 +3,7 @@
 from typing import Any, Dict
 
 from app.gphotos_client import GooglePhotosClient
+from app.log import get_logger
 
 
 def test_extract_metadata() -> None:
@@ -14,6 +15,8 @@ def test_extract_metadata() -> None:
     }
 
     client: GooglePhotosClient = GooglePhotosClient.__new__(GooglePhotosClient)  # Avoid __init__ (no auth)
+    client.logger = get_logger("TestClient")  # Use a test logger
+
     metadata: Dict[str, str | None] = client.extract_metadata(media_item)
 
     assert metadata["id"] == "abc123"
