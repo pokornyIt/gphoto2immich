@@ -4,12 +4,13 @@ import datetime
 import json
 import os
 from logging import Logger
-from typing import Any, Optional
+from typing import Any
 
 import requests
-from google.auth.external_account_authorized_user import Credentials as auth_user_credentials
+from google.auth.exceptions import RefreshError
+from google.auth.external_account_authorized_user import Credentials as AuthUserCredentials
 from google.auth.transport.requests import Request
-from google.oauth2.credentials import Credentials as oauth2_credentials
+from google.oauth2.credentials import Credentials as OAuth2Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build_from_document
 
@@ -34,26 +35,73 @@ class GooglePhotosClient:
         self.logger = get_logger(self.__class__.__name__)
         self.service = self._authenticate(credentials_path)
 
+    def _test_if_token_expired(self) -> bool:
+        """Check if the token is expired.
+
+        :return: True if the token is expired, False otherwise.
+        """
+        if not os.path.exists(TOKEN_PATH):
+            self.logger.warning("Token file does not exist: %s", TOKEN_PATH)
+            return True
+
+        with open(TOKEN_PATH) as token_file:
+            self.logger.debug("Loading token from %s", TOKEN_PATH)
+            token_data: dict[str, Any] = json.loads(token_file.read())
+            if "expiry" not in token_data:
+                self.logger.debug("Token file does not contain a refresh token.")
+                return True
+            self.logger.debug("Checking if token is expired...")
+            # Load the token and check if it is expired
+            refresh_date: datetime.datetime = datetime.datetime.fromisoformat(token_data.get("expiry", ""))
+            if refresh_date < datetime.datetime.now(datetime.UTC):
+                self.logger.info("Token is expired, needs refresh.")
+                return True
+
+        return False
+
     def _authenticate(self, credentials_path: str) -> Any:
         """Authenticate and create a service object for Google Photos API.
 
         :param credentials_path: Path to the Google API credentials JSON file.
         :return: Authenticated service object for Google Photos API.
         """
-        user_credentials: auth_user_credentials | oauth2_credentials
+        user_credentials: AuthUserCredentials | OAuth2Credentials
+        user_credentials_initialized: bool = False
 
         if os.path.exists(TOKEN_PATH):
-            self.logger.debug("Loading existing token from %s", TOKEN_PATH)
-            user_credentials = oauth2_credentials.from_authorized_user_file(TOKEN_PATH, SCOPES)
+            if self._test_if_token_expired():
+                self.logger.info("Token is expired, refreshing...")
+                try:
+                    os.unlink(TOKEN_PATH)
+                except OSError as e:
+                    self.logger.error("Failed to delete expired token file %s: %s", TOKEN_PATH, e)
+                user_credentials_initialized = False
+            else:
+                user_credentials_initialized = True
+                self.logger.debug("Loading existing token from %s", TOKEN_PATH)
+                user_credentials = OAuth2Credentials.from_authorized_user_file(TOKEN_PATH, SCOPES)
 
-        if not user_credentials or not user_credentials.valid:
-            if user_credentials and user_credentials.expired and user_credentials.refresh_token:
+        if not user_credentials_initialized or not user_credentials or not user_credentials.valid:
+            if (
+                user_credentials_initialized
+                and user_credentials
+                and user_credentials.expired
+                and user_credentials.refresh_token
+            ):
                 self.logger.info("Refreshing expired token...")
-                user_credentials.refresh(Request())
+
+                try:
+                    user_credentials.refresh(Request())
+                except RefreshError as e:
+                    self.logger.error("Token refresh failed: %s", e)
+                    os.remove(TOKEN_PATH)
+                    raise RuntimeError("Token expired and could not be refreshed. Please re-authenticate.")
             else:
                 self.logger.info("No valid token found, starting OAuth flow...")
                 flow: InstalledAppFlow = InstalledAppFlow.from_client_secrets_file(credentials_path, SCOPES)
                 user_credentials = flow.run_local_server(port=0)
+            # Save the new token to a file
+            self.logger.debug("Saving new token to %s", TOKEN_PATH)
             with open(TOKEN_PATH, "w") as token_file:
                 token_file.write(user_credentials.to_json())
                 self.logger.info("Saved new token to %s", TOKEN_PATH)
@@ -67,7 +115,9 @@ class GooglePhotosClient:
         :param days_back: Number of days back to fetch media items.
         :return: List of media items from Google Photos API.
         """
-        start_date: str = (datetime.datetime.utcnow() - datetime.timedelta(days=days_back)).isoformat("T") + "Z"
+        start_date: str = (
+            f"{(datetime.datetime.now(datetime.UTC) - datetime.timedelta(days=days_back)).isoformat('T')}Z"
+        )
         media_items: list[Any] = []
 
         request = self.service.mediaItems().list(pageSize=100)
@@ -84,9 +134,14 @@ class GooglePhotosClient:
         return media_items
 
     def fetch_media_items(self, days_back: int) -> list[dict]:
+        """Fetch media items from Google Photos API within a specified date range.
+
+        :param days_back: Number of days back to fetch media items.
+        :return: List of media items from Google Photos API.
+        """
         media_items: list[Any] = []
 
-        end: datetime.datetime = datetime.datetime.utcnow()
+        end: datetime.datetime = datetime.datetime.now(datetime.UTC)
         start: datetime.datetime = end - datetime.timedelta(days=days_back)
 
         request_body: dict[str, Any] = {
@@ -116,7 +171,7 @@ class GooglePhotosClient:
         self.logger.info("Total media items fetched: %d", len(media_items))
         return media_items
 
-    def extract_metadata(self, media_item: dict) -> dict[str, Optional[str]]:
+    def extract_metadata(self, media_item: dict) -> dict[str, str | None]:
         """Extract metadata from a media item.
 
         :param media_item: A media item dictionary from Google Photos API.

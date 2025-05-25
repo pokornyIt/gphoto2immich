@@ -8,6 +8,10 @@ from app.immich_client import ImmichClient
 
 @pytest.fixture
 def client() -> ImmichClient:
+    """Fixture to create an ImmichClient instance for testing.
+
+    :return: An instance of ImmichClient with a test base URL and API key.
+    """
     return ImmichClient(base_url="http://immich.local/api", api_key="test-key")
 
 

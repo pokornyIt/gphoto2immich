@@ -1,3 +1,31 @@
+# ⚠️ Important Notice: API Support Deprecated
+
+As of **March 31, 2025**, Google has deprecated the following Google Photos API scopes:
+
+- `photoslibrary.readonly`
+- `photoslibrary`
+- `photoslibrary.sharing`
+
+These scopes are no longer functional, even if previously authorized.
+
+This means **gphoto2immich can no longer access existing photos in Google Photos via the API**.
+
+## ⛔ Project Status
+
+As a result of the API scope deprecations, this project is currently in a **frozen state**.
+Development is paused while we evaluate whether it makes sense to continue or pivot the tool in a different direction.
+
+Possible future directions include:
+
+- Parsing [Google Takeout](https://takeout.google.com/) exports
+- Using Immich's built-in upload capabilities
+- Limited support via Picker API for manually selected items
+
+In the meantime, the current implementation is preserved for reference.
+If you'd like to propose an alternative direction or contribute ideas (e.g., Takeout integration), feel free to open a discussion or issue.
+
+---
+
 # gphoto2immich
 
 Synchronize photo descriptions from Google Photos to [Immich](https://github.com/immich-app/immich).

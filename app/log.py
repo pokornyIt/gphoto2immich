@@ -3,22 +3,22 @@
 import logging
 import os
 import sys
-from datetime import datetime, timezone
+from datetime import UTC, datetime, timezone
 
 LOG_LEVEL: str = os.getenv("LOG_LEVEL", "INFO").upper()
 
 
 class FixedWidthFormatter(logging.Formatter):
-    """ "Formatter that formats log messages with fixed-width fields."""
+    """Formatter that formats log messages with fixed-width fields."""
 
-    def formatTime(self, record: logging.LogRecord, datefmt: str | None = None) -> str:
+    def formatTime(self, record: logging.LogRecord, datefmt: str | None = None) -> str: # noqa: N802
         """Format the time of the log record.
 
         :param record: The log record to format.
         :param datefmt: Optional date format string. If None, the default format is used.
         :return: The formatted time string.
         """
-        dt: datetime = datetime.fromtimestamp(record.created, tz=timezone.utc).astimezone()
+        dt: datetime = datetime.fromtimestamp(record.created, tz=UTC).astimezone()
         return dt.strftime("%Y-%m-%dT%H:%M:%S.") + f"{int(record.msecs):03d}" + dt.strftime("%z")
 
     def format(self, record: logging.LogRecord) -> str:
@@ -32,8 +32,7 @@ class FixedWidthFormatter(logging.Formatter):
 
 
 def get_logger(name: str) -> logging.Logger:
-    """
-    Get a logger with the specified name. If no handlers are set, add a StreamHandler with a specific format.
+    """Get a logger with the specified name. If no handlers are set, add a StreamHandler with a specific format.
 
     :param name: The name of the logger.
     :return: A logger instance.

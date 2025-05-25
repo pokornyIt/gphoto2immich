@@ -10,6 +10,8 @@ load_dotenv()  # Automatically loads values from .env file
 
 @dataclass
 class Config:
+    """Configuration for the application."""
+
     google_credentials_path: str
     immich_base_url: str
     immich_api_key: str
@@ -19,6 +21,10 @@ class Config:
 
     @staticmethod
     def load() -> "Config":
+        """Load configuration from environment variables or defaults.
+        
+        :return: Config object with loaded settings.
+        """
         return Config(
             google_credentials_path=os.getenv("GOOGLE_CREDENTIALS_PATH", "credentials.json"),
             immich_base_url=os.getenv("IMMICH_BASE_URL") or "",
