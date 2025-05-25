@@ -9,6 +9,7 @@ from app.sync import SyncService
 
 
 def main() -> None:
+    """Start the main synchronization service."""
     logger: Logger = get_logger("main")
     try:
         config: Config = Config.load()

@@ -5,6 +5,7 @@ from typing import Any
 
 import requests
 
+from app.constants import HTTP_OK
 from app.log import get_logger
 
 
@@ -61,7 +62,7 @@ class ImmichClient:
         url: str = f"{self.base_url}/asset/{asset_id}"
         self.logger.debug("Updating description for asset %s", asset_id)
         response: requests.Response = requests.put(url, headers=self.headers, json={"description": description})
-        if response.status_code == 200:
+        if response.status_code == HTTP_OK:
             self.logger.debug("Successfully updated asset %s", asset_id)
             return True
 

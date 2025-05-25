@@ -1,0 +1,60 @@
+# Same as Black.
+line-length = 120
+indent-width = 4
+
+# Assume Python 3.11
+target-version = "py311"
+
+# exclude validated files/folders
+# extend-exclude = ["tests/integration", "core/TransferCoreArchive.py"]
+
+[format]
+docstring-code-format = true
+indent-style = "space"
+
+[lint.isort]
+combine-as-imports = true
+section-order = [
+    "future",
+    "standard-library",
+    "third-party",
+    "first-party",
+    "local-folder",
+]
+
+[lint.pycodestyle]
+max-doc-length = 120
+
+[lint]
+# enable specific rules
+select = [
+    "E501", # `line-too-long` rule to the enforced rule set
+    "UP", # "UP" - enforce the pyupgrade rules 
+    "D", # "D" - enable detail documentation rules
+    # "W", # "W" - enable warnings
+    "I", # "I" - enable ISORT
+    "N", # "N" - enable pep8-naming
+    # "PD", # "PD" - enable pandas-naming
+    "PL", # "PL" - enable pylint
+    "NPY", # "NPY" - enable numpy-naming
+    "NPY201", # "NPY201" - enablenumpy-naming rule for 2.0.0 version
+    "AIR", # "AIR" - enable airflow-naming
+    # "PERF", # "PERF" - enable performance-naming
+    # "FURB", # "FURB" - enable functional-naming (now is in preview)
+    "RUF", # "RUF" - enable ruff
+    ] 
+# global disable rules
+ignore = [
+    "W605", # invalid escape sequence
+    "D200", # one line docstring should fit on one line with quotes
+    "D203", # blank line required after docstring 
+    # "D211", # incorrect blank line before class
+    "D213", # Checks for docstring summary lines that are not positioned on the second physical line
+    "D400", # First line should end with a period
+    "D415", # First line should end with a period, question mark, or exclamation point
+    "RUF012", # Mutable class attributes should be annotated with typing.ClassVar
+]
+
+
+[lint.per-file-ignores]
+# E402 - import not at top of file

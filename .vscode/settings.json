@@ -1,84 +1,99 @@
 {
-    "files.exclude": {
-        ".pytest_cache/": true,
-        ".venv/": true,
-        "__pycache__/": true,
-        "build/": true,
-        "dist/": true,
-        "**/__pycache__": true,
-        "**/.mypy_cache": true,
-        "**/.ruff_cache": true
-    },
-    "files.insertFinalNewline": true,
-    "files.watcherExclude": {
-        "**/..pytest_cache/": true,
-        "**/.venv/": true,
-        "**/__pycache__": true,
-        "**/build/": true,
-        "**/dist/": true,
-        "**/.mypy_cache": true,
-        "**/.ruff_cache": true
-    },
-    "editor.tabSize": 4,
-    "editor.insertSpaces": true,
-    "python.testing.autoTestDiscoverOnSaveEnabled": true,
-    "python.envFile": "${workspaceFolder}/.env",
-    "python.analysis.inlayHints.functionReturnTypes": true,
-    "python.analysis.inlayHints.pytestParameters": true,
-    "python.analysis.inlayHints.variableTypes": true,
-    "python.analysis.autoImportCompletions": true,
-    "python.analysis.diagnosticMode": "openFilesOnly",
-    "python.terminal.activateEnvironment": true,
-    "python.analysis.typeCheckingMode": "basic",
-    "python.testing.unittestEnabled": false,
-    "python.testing.pytestEnabled": true,
-    "prettier.printWidth": 120,
-    "pylint.enabled": false,
-    "ruff.lineLength": 120,
-    "ruff.enable": true,
-    "[python]": {
-        "editor.defaultFormatter": "charliermarsh.ruff",
-        // "editor.wordWrap": "wordWrapColumn",
-        "editor.wordWrap": "off",
-        "editor.wordWrapColumn": 120,
-        "editor.formatOnSave": true,
-        "editor.rulers": [
-            120
-        ],
-        "editor.codeActionsOnSave": {
-            "source.organizeImports": "explicit"
-        }
-    },
-    "cSpell.words": [
-        "pytest"
+  "files.exclude": {
+    ".pytest_cache/": true,
+    ".venv/": true,
+    "__pycache__/": true,
+    "build/": true,
+    "dist/": true,
+    "**/__pycache__": true,
+    "**/.mypy_cache": true,
+    "**/.ruff_cache": true
+  },
+  "files.insertFinalNewline": true,
+  "files.watcherExclude": {
+    "**/..pytest_cache/": true,
+    "**/.venv/": true,
+    "**/__pycache__": true,
+    "**/build/": true,
+    "**/dist/": true,
+    "**/.mypy_cache": true,
+    "**/.ruff_cache": true
+  },
+  "git-graph.date.format": "ISO Date & Time",
+  "git-graph.repository.fetchAndPrune": true,
+  "git-graph.dialog.fetchRemote.prune": true,
+  "git-graph.dialog.merge.noFastForward": false,
+  "git-graph.dialog.fetchRemote.pruneTags": true,
+  "editor.tabSize": 4,
+  "editor.insertSpaces": true,
+  "python.testing.autoTestDiscoverOnSaveEnabled": true,
+  "python.envFile": "${workspaceFolder}/.env",
+  "python.analysis.inlayHints.functionReturnTypes": true,
+  "python.analysis.inlayHints.pytestParameters": true,
+  "python.analysis.inlayHints.variableTypes": true,
+  "python.analysis.autoImportCompletions": true,
+  "python.analysis.diagnosticMode": "openFilesOnly",
+  "python.terminal.activateEnvironment": true,
+  "python.analysis.typeCheckingMode": "basic",
+  "python.testing.unittestEnabled": false,
+  "python.testing.pytestEnabled": true,
+  "prettier.printWidth": 120,
+  "python.defaultInterpreterPath": "${workspaceFolder}/.venv/bin/python",
+  "python.testing.pytestPath": "${workspaceFolder}/.venv/bin/pytest",
+  "pylint.enabled": false,
+  "[python]": {
+    "editor.defaultFormatter": "charliermarsh.ruff",
+    // "editor.wordWrap": "wordWrapColumn",
+    "editor.wordWrap": "off",
+    "editor.wordWrapColumn": 120,
+    "editor.formatOnSave": true,
+    "editor.rulers": [
+      120
     ],
-    "cSpell.ignoreWords": [
-        "dotenv",
-        "gphoto",
-        "immich",
-        "photoslibrary",
-        "googleapiclient",
-        "gphotos",
-        "capsys",
-        "addopts",
-        "testpaths",
-        "mypy",
-        "caplog",
-        "levelname",
-        "exif"
-    ],
-    "cSpell.ignorePaths": [
-        "package-lock.json",
-        "node_modules",
-        "vscode-extension",
-        ".git/{info,lfs,logs,refs,objects}/**",
-        ".git/{index,*refs,*HEAD}",
-        ".vscode",
-        ".vscode-insiders"
-    ],
-    "python.testing.pytestArgs": [
-        "tests"
-    ],
-    "git-graph.dialog.fetchRemote.prune": true,
-    "git-graph.dialog.fetchRemote.pruneTags": true,
+    "editor.codeActionsOnSave": {
+      "source.organizeImports": "explicit",
+      "source.organizeImports.ruff": "explicit"
+    }
+  },
+  "ruff.lineLength": 120,
+  "ruff.enable": true,
+  "ruff.path": [
+    "${workspaceFolder}/.venv/bin/ruff"
+  ],
+  "ruff.interpreter": [
+    "${workspaceFolder}/.venv/bin/python"
+  ],
+  "ruff.lint.enable": true,
+  "editor.formatOnSave": true,
+  "python.testing.pytestArgs": [
+    "tests"
+  ],
+  "cSpell.ignorePaths": [
+    "package-lock.json",
+    "node_modules",
+    "vscode-extension",
+    ".git/{info,lfs,logs,refs,objects}/**",
+    ".git/{index,*refs,*HEAD}",
+    ".vscode",
+    ".vscode-insiders"
+  ],
+  "cSpell.words": [
+    "pytest"
+  ],
+  "cSpell.ignoreWords": [
+    "dotenv",
+    "gphoto",
+    "immich",
+    "photoslibrary",
+    "googleapiclient",
+    "gphotos",
+    "capsys",
+    "addopts",
+    "testpaths",
+    "mypy",
+    "caplog",
+    "levelname",
+    "exif",
+    "msecs"
+  ],
 }

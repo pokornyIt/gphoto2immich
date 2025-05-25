@@ -10,7 +10,7 @@ class DummyImmichClient:
         """Initialize the dummy client."""
         self.updated: list[Any] = []
 
-    def find_asset_by_filename(self, filename: str) -> Optional[str]:
+    def find_asset_by_filename(self, filename: str) -> str | None:
         """Find an asset by filename.
 
         :param filename: The filename of the asset to search for.

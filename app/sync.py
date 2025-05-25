@@ -29,6 +29,7 @@ class SyncService:
         self.logger.debug(f"Initialized with config: {config}")
 
     def run(self) -> None:
+        """Run the sync process to update Immich with Google Photos items."""
         self.logger.info("Fetching Google Photos items from last %d days...", self.config.days_back)
         items: list[dict[Any, Any]] = self.gphotos.fetch_media_items(self.config.days_back)
         self.logger.info("Found %d items.", len(items))
